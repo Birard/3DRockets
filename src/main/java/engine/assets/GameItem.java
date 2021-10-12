@@ -9,17 +9,15 @@ public class GameItem {
 
     private  Mesh mesh;
     private  NewMesh[] newMesh;
-    private final Vector3f position;
+    protected final Vector3f position;
     private float scale;
-    private final Vector3f rotation;
-    private Quaternionf rotationQ;
+    protected Quaternionf rotationQ;
     private boolean hasNewMesh;
 
 
     public GameItem() {
         position = new Vector3f();
         scale = 1;
-        rotation = new Vector3f();
         rotationQ = new Quaternionf(0,0,0,1);
     }
 
@@ -61,10 +59,6 @@ public class GameItem {
         this.scale = scale;
     }
 
-    public Vector3f getRotation() {
-        return rotation;
-    }
-
     public Quaternionf getQuatRotation() {
         return rotationQ;
     }
@@ -79,16 +73,9 @@ public class GameItem {
     }
 
     public void setRotation(float x, float y, float z) {
-//        rotationQ.rotateLocalX((float)Math.toRadians(x));
-//        rotationQ.rotateLocalY((float)Math.toRadians(y));
-//        rotationQ.rotateLocalZ((float)Math.toRadians(z));
         rotationQ.rotateAxis((float)Math.toRadians(z), new Vector3f(0f, 0f, 1f)).
         rotateAxis((float)Math.toRadians(y), new Vector3f(0f, 1f, 0f)).
         rotateAxis((float)Math.toRadians(x), new Vector3f(1f, 0f, 0f));
-
-//        this.rotation.x = x;
-//        this.rotation.y = y;
-//        this.rotation.z = z;
     }
 
     public Mesh getMesh() {

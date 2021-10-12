@@ -7,6 +7,7 @@ import engine.io.Timer;
 import engine.io.Window;
 import engine.render.Camera;
 import engine.render.Renderer;
+import gameData.Stages.Entitys.Player;
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -26,7 +27,7 @@ public class MenuStage extends MainGameStage {
     private ArrayList<GameItem> gameItems;
     private Renderer renderer;
     private static final Window window = Window.windows;
-    private static Satellit satellit;///////////////////////////////////////////////////////
+    private static Player satellit;///////////////////////////////////////////////////////
     NewMesh[] satelliteMesh;
 
     public MenuStage() {
@@ -158,21 +159,25 @@ public class MenuStage extends MainGameStage {
 //        Mesh mesh = new Mesh(positions, textCoords, indices, texture);
 
         satelliteMesh = NewStaticMeshesLoader.load("src/main/resources/Satelite/Satellite.obj", "src/main/resources/Satelite/text");
-       System.out.println(satelliteMesh.length);
-        GameItem satellite0 = new GameItem(satelliteMesh);
+        Player satellite0 = new Player(satelliteMesh);
         satellite0.setPosition(0,0,0);
         satellite0.setScale(2);
         gameItems.add(satellite0);
-        satellit = new Satellit();//////////////////////////////////////////////////
+        satellit = satellite0;//////////////////////////////////////////////////
+
+        GameItem satellite1 = new Player(satelliteMesh);
+        satellite1.setPosition(0,0,0);
+        satellite1.setScale(2);
+        gameItems.add(satellite1);//////////////////////////////////////////////////
 
         NewMesh[] mesh = NewStaticMeshesLoader.load("src/main/resources/untitled.obj", "src/main/resources/");
         GameItem skyBox = new GameItem(mesh);
-        Vector3f vector3f = renderer.camera.getPosition();
-        skyBox.setPosition(vector3f.x, vector3f.y, vector3f.z);
-        skyBox.setScale(30);
+        skyBox.setPosition(0,-10, -20);
+        skyBox.setScale((float) 1);
         gameItems.add(skyBox);
-        renderer.camera.setPosition(0,10,20);
-        renderer.camera.setFocus(gameItems.get(0).getPosition(), gameItems.get(0).getRotation());
+        ////////////////////////////////////////////////////////////////////////
+//        renderer.camera.setPosition(0,10,20);
+//        renderer.camera.setFocus(gameItems.get(0).getPosition());
 
         int hidenConus = 5, timerrr = 0;
         satelliteMesh[5].setNeedToRender(false);
@@ -226,15 +231,29 @@ public class MenuStage extends MainGameStage {
 
                 //////////////////////////////////////////////////////////////////////
 
-                gameItems.get(0).rotate( satellit.calculation(frame_cap));
+                satellit.updateRotate(frame_cap);
+                satellit.move(frame_cap);
+
+                Vector3f posS = satellit.getPosition();
+                Quaternionf quarS = satellit.getQuatRotation();
+                Vector3f vectorF = new Vector3f(-20, 10, 0);
+                vectorF.rotate(quarS);
+                Vector3f posC = new Vector3f((posS.x + vectorF.x), (posS.y + vectorF.y), (posS.z + vectorF.z));
+                renderer.camera.setPosition(posC);
+                Quaternionf qe = new Quaternionf();
+                qe.rotateAxis((float) Math.toRadians(90), new Vector3f(0,1,0));
+                qe.div(quarS);
+                renderer.camera.setRotation(qe);
 
                 /////////////////////////////////////////////////////////////////////
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-                if(renderer.camera.isFocused())
-                renderer.camera.setFocus(gameItems.get(0).getPosition(), gameItems.get(0).getRotation());
+//                if(renderer.camera.isFocused())
+//                renderer.camera.setFocus(gameItems.get(0).getPosition());
 
-                gameItems.get(gameItems.size()-1).setPosition(renderer.camera.getPosition());
+                // для скайблока щоб бути разом з камерою
+//                gameItems.get(gameItems.size()-1).setPosition(renderer.camera.getPosition());
+
                 renderer.render(window, gameItems);
 
                 gui.render();
@@ -249,50 +268,50 @@ public class MenuStage extends MainGameStage {
     }
 
     public void keyIsPressed(int key) {
-        Vector3f v = gameItems.get(0).getRotation();
         switch (key) {
             case GLFW_KEY_ESCAPE:
                 glfwSetWindowShouldClose(window.getWindow(), true);
                 stop = true;
                 break;
-            case GLFW_KEY_W:
-                renderer.camera.movePosition(0, 0,(float) -0.1);
-                break;
-            case GLFW_KEY_S:
-                renderer.camera.movePosition(0, 0,(float) 0.1);
-                break;
-            case GLFW_KEY_A:
-                renderer.camera.movePosition((float) -0.1, 0,0);
-                break;
-            case GLFW_KEY_D:
-                renderer.camera.movePosition((float) 0.1, 0,0);
-                break;
-            case GLFW_KEY_LEFT_SHIFT:
-                renderer.camera.movePosition(0, (float) -0.1,0);
-                break;
-            case GLFW_KEY_SPACE:
-                renderer.camera.movePosition(0, (float) 0.1,0);
-                break;
+//            case GLFW_KEY_W:
+//                renderer.camera.movePosition(0, 0,(float) -0.1);
+//                break;
+//            case GLFW_KEY_S:
+//                renderer.camera.movePosition(0, 0,(float) 0.1);
+//                break;
+//            case GLFW_KEY_A:
+//                renderer.camera.movePosition((float) -0.1, 0,0);
+//                break;
+//            case GLFW_KEY_D:
+//                renderer.camera.movePosition((float) 0.1, 0,0);
+//                break;
+//            case GLFW_KEY_LEFT_SHIFT:
+//                renderer.camera.movePosition(0, (float) -0.1,0);
+//                break;
+//            case GLFW_KEY_SPACE:
+//                renderer.camera.movePosition(0, (float) 0.1,0);
+//                break;
             case GLFW_KEY_N:
 //                window.swapBuffers();
 //                again = true;
                 break;
-            case GLFW_KEY_F:
-                if(renderer.camera.isFocused()) renderer.camera.setFocused(false);
-                else
-                renderer.camera.setFocus(gameItems.get(0).getPosition(), gameItems.get(0).getRotation());
-
-                break;
+//            case GLFW_KEY_F:
+//                if(renderer.camera.isFocused()) renderer.camera.setFocused(false);
+//                else
+//                renderer.camera.setFocus(gameItems.get(0).getPosition());
+//
+//                break;
             case GLFW_KEY_KP_8:
-//                gameItems.get(0).setRotation(v.x, v.y, v.z+1);
+            case GLFW_KEY_8:
                 satelliteMesh[9].setNeedToRender(true);
                 satelliteMesh[12].setNeedToRender(true);
 
                 satellit.setControls(satellit.M1,satellit.M2,1);
 
-             /////////////   \\\\\\\\\\\\\\\\\\//////////////////////////////////
+             /////////////   \\\\\\\\\\\\\\\\\\/////////////////82/////////////////
                 break;
             case GLFW_KEY_KP_2:
+            case GLFW_KEY_2:
 //                gameItems.get(0).setRotation(v.x, v.y, v.z-1);
                 satelliteMesh[10].setNeedToRender(true);
                 satelliteMesh[11].setNeedToRender(true);
@@ -300,12 +319,14 @@ public class MenuStage extends MainGameStage {
                 /////////////////////////////////////////////////////////////////
                 break;
             case GLFW_KEY_KP_6:
+            case GLFW_KEY_6:
                 satelliteMesh[5].setNeedToRender(true);
                 satelliteMesh[6].setNeedToRender(true);
 //                gameItems.get(0).setRotation(v.x+1, v.y, v.z);
                 satellit.setControls(+1,satellit.M2,satellit.M3);
                 break;
             case GLFW_KEY_KP_4:
+            case GLFW_KEY_4:
                 satelliteMesh[7].setNeedToRender(true);
                 satelliteMesh[8].setNeedToRender(true);
 //                gameItems.get(0).setRotation(v.x-1, v.y, v.z);
@@ -327,6 +348,7 @@ public class MenuStage extends MainGameStage {
                 break;
 
             case GLFW_KEY_KP_5:
+            case GLFW_KEY_5:
                 if(Input.isKeyPressed(key)) {
                     satelliteMesh[5].setNeedToRender(false);
                     satelliteMesh[6].setNeedToRender(false); satelliteMesh[11].setNeedToRender(false);
@@ -336,7 +358,6 @@ public class MenuStage extends MainGameStage {
                     satelliteMesh[12].setNeedToRender(false); satelliteMesh[16].setNeedToRender(false);
                     satelliteMesh[10].setNeedToRender(false);
                     gameItems.get(0).setQuatRotation(new Quaternionf(0,0,0,1));
-                    satellit = new Satellit();
                 }
                 break;
             case GLFW_KEY_1:
@@ -353,7 +374,6 @@ public class MenuStage extends MainGameStage {
     }
 
     public void mouseButtonIsPressed(int mouseButton) {
-    Vector3f vec = renderer.camera.getRotation();
         switch (mouseButton) {
             case GLFW_MOUSE_BUTTON_LEFT:
                 if(Input.isMouseButtonPressed(mouseButton)) {

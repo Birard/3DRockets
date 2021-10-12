@@ -23,13 +23,15 @@ public class Transformation {
 
     public Matrix4f getViewMatrix(Camera camera) {
         Vector3f cameraPos = camera.getPosition();
-        Vector3f rotation = camera.getRotation();
+//        Vector3f rotation = camera.getRotation();
+        Quaternionf rotationQ = camera.getRotation();
 
         viewMatrix.identity();
         // First do the rotation so camera rotates over its position
-        viewMatrix.rotate((float)Math.toRadians(rotation.x), new Vector3f(1, 0, 0))
-                .rotate((float)Math.toRadians(rotation.y), new Vector3f(0, 1, 0));
-             //   .rotate((float)Math.toRadians(rotation.z), new Vector3f(0, 0, 1));
+        viewMatrix.rotate(rotationQ);
+//        viewMatrix.rotate((float)Math.toRadians(rotation.x), new Vector3f(1, 0, 0))
+//                .rotate((float)Math.toRadians(rotation.y), new Vector3f(0, 1, 0));
+//             //   .rotate((float)Math.toRadians(rotation.z), new Vector3f(0, 0, 1));
 
         // Then do the translation
         viewMatrix.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
@@ -61,9 +63,7 @@ public class Transformation {
     }
 
     public Matrix4f buildModelMatrix(GameItem gameItem) {
-        Vector3f f3 = gameItem.getRotation();
-        Quaternionf rotation = new Quaternionf(f3.x, f3.y, f3.z, 0);
-       // Quaternionf rotation = gameItem.getRotation();
+        Quaternionf rotation = gameItem.getQuatRotation();
         return modelViewMatrix.translationRotateScale(
                 gameItem.getPosition().x, gameItem.getPosition().y, gameItem.getPosition().z,
                 rotation.x, rotation.y, rotation.z, rotation.w,

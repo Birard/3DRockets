@@ -4,6 +4,7 @@ import engine.assets.GameItem;
 import engine.assets.Mesh;
 import engine.io.Window;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ public class Renderer {
     private static final float Z_NEAR = 0.0001f;
     private static final float Z_FAR = 10000.f;
     public Transformation transformation;  /////////////////////
-    public Camera camera = new Camera(new Vector3f(0,0,0), new Vector3f(0,0,0));
+    public Camera camera = new Camera(new Vector3f(0,0,0), new Quaternionf());
     private ShaderProgram shaderProgram;
 
     public Renderer() {
