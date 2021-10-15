@@ -301,65 +301,50 @@ public class MenuStage extends MainGameStage {
 //                renderer.camera.setFocus(gameItems.get(0).getPosition());
 //
 //                break;
-            case GLFW_KEY_KP_8:
-            case GLFW_KEY_8:
+            case GLFW_KEY_S:
                 satelliteMesh[9].setNeedToRender(true);
                 satelliteMesh[12].setNeedToRender(true);
-
                 satellit.setControls(satellit.M1,satellit.M2,1);
-
-             /////////////   \\\\\\\\\\\\\\\\\\/////////////////82/////////////////
                 break;
-            case GLFW_KEY_KP_2:
-            case GLFW_KEY_2:
-//                gameItems.get(0).setRotation(v.x, v.y, v.z-1);
+            case GLFW_KEY_W:
                 satelliteMesh[10].setNeedToRender(true);
                 satelliteMesh[11].setNeedToRender(true);
                 satellit.setControls(satellit.M1,satellit.M2,-1);
-                /////////////////////////////////////////////////////////////////
                 break;
-            case GLFW_KEY_KP_6:
-            case GLFW_KEY_6:
+            case GLFW_KEY_D:
                 satelliteMesh[5].setNeedToRender(true);
                 satelliteMesh[6].setNeedToRender(true);
-//                gameItems.get(0).setRotation(v.x+1, v.y, v.z);
                 satellit.setControls(+1,satellit.M2,satellit.M3);
                 break;
-            case GLFW_KEY_KP_4:
-            case GLFW_KEY_4:
+            case GLFW_KEY_A:
                 satelliteMesh[7].setNeedToRender(true);
                 satelliteMesh[8].setNeedToRender(true);
-//                gameItems.get(0).setRotation(v.x-1, v.y, v.z);
                 satellit.setControls(-1,satellit.M2,satellit.M3);
                 break;
-            case GLFW_KEY_MINUS:
-            case GLFW_KEY_KP_SUBTRACT:
+            case GLFW_KEY_E:
                 satelliteMesh[13].setNeedToRender(true);
                 satelliteMesh[15].setNeedToRender(true);
-//                gameItems.get(0).setRotation(v.x, v.y-1, v.z);
                 satellit.setControls(satellit.M1,-1,satellit.M3);
                 break;
-            case GLFW_KEY_EQUAL:
-            case GLFW_KEY_KP_ADD:
+            case GLFW_KEY_Q:
                 satelliteMesh[14].setNeedToRender(true);
                 satelliteMesh[16].setNeedToRender(true);
-//                gameItems.get(0).setRotation(v.x, v.y+1, v.z);
                 satellit.setControls(satellit.M1,1,satellit.M3);
                 break;
 
-            case GLFW_KEY_KP_5:
-            case GLFW_KEY_5:
-                if(Input.isKeyPressed(key)) {
-                    satelliteMesh[5].setNeedToRender(false);
-                    satelliteMesh[6].setNeedToRender(false); satelliteMesh[11].setNeedToRender(false);
-                    satelliteMesh[7].setNeedToRender(false); satelliteMesh[13].setNeedToRender(false);
-                    satelliteMesh[8].setNeedToRender(false); satelliteMesh[15].setNeedToRender(false);
-                    satelliteMesh[9].setNeedToRender(false); satelliteMesh[14].setNeedToRender(false);
-                    satelliteMesh[12].setNeedToRender(false); satelliteMesh[16].setNeedToRender(false);
-                    satelliteMesh[10].setNeedToRender(false);
-                    gameItems.get(0).setQuatRotation(new Quaternionf(0,0,0,1));
-                }
-                break;
+//            case GLFW_KEY_KP_5:
+//            case GLFW_KEY_5:
+//                if(Input.isKeyPressed(key)) {
+//                    satelliteMesh[5].setNeedToRender(false);
+//                    satelliteMesh[6].setNeedToRender(false); satelliteMesh[11].setNeedToRender(false);
+//                    satelliteMesh[7].setNeedToRender(false); satelliteMesh[13].setNeedToRender(false);
+//                    satelliteMesh[8].setNeedToRender(false); satelliteMesh[15].setNeedToRender(false);
+//                    satelliteMesh[9].setNeedToRender(false); satelliteMesh[14].setNeedToRender(false);
+//                    satelliteMesh[12].setNeedToRender(false); satelliteMesh[16].setNeedToRender(false);
+//                    satelliteMesh[10].setNeedToRender(false);
+//                    gameItems.get(0).setQuatRotation(new Quaternionf(0,0,0,1));
+//                }
+//                break;
             case GLFW_KEY_1:
                 if(Input.isKeyPressed(key)) {
                     pause = !pause;
