@@ -5,10 +5,8 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.system.MemoryStack;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -103,7 +101,12 @@ public class ShaderProgram {
         StringBuilder string = new StringBuilder();
         BufferedReader br;
         try {
-            br = new BufferedReader(new FileReader(new File("src/main/shaders/" + filename)));
+
+            InputStream inputStream = ShaderProgram.class.getResourceAsStream("/shaders/" + filename);
+            InputStreamReader streamReader = new InputStreamReader(inputStream);
+            br = new BufferedReader(streamReader);
+
+//            br = new BufferedReader(new FileReader(new File("src/main/shaders/" + filename)));
             String line;
             while ((line = br.readLine()) != null) {
                 string.append(line);
@@ -125,8 +128,4 @@ public class ShaderProgram {
         glDeleteProgram(program);
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-    }
 }

@@ -1,13 +1,21 @@
 package engine.assets;
 
 import engine.io.Utils;
+import gameData.Stages.GameStage.GameStage;
 import org.joml.Vector4f;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.assimp.*;
 
+import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import static org.lwjgl.assimp.Assimp.*;
 
@@ -20,6 +28,10 @@ public class NewStaticMeshesLoader {
     }
 
     public static NewMesh[] load(String resourcePath, String texturesDir, int flags) throws Exception {
+
+        resourcePath = getPath(resourcePath);
+        texturesDir = getPath(texturesDir);
+
         AIScene aiScene = aiImportFile(resourcePath, flags);
         if (aiScene == null) {
             throw new Exception("Error loading model");
@@ -45,6 +57,21 @@ public class NewStaticMeshesLoader {
         return meshes;
     }
 
+    private static String getPath(String name) {
+
+        String bresourcePath = NewStaticMeshesLoader.class.getClassLoader().getResource(name).getPath();
+        if(bresourcePath.contains(".jar!")) {
+            bresourcePath = bresourcePath.substring(bresourcePath.indexOf('/'));
+            String path = bresourcePath;
+            String path1 = path.substring(0, path.lastIndexOf(".jar!"));
+            String path2 = path.substring(path.lastIndexOf(".jar!"));
+            path1 = path1.substring(0, path1.lastIndexOf('/'));
+            path2 = path2.substring(path2.indexOf('/'));
+            bresourcePath = path1 + path2;
+        }
+        return bresourcePath;
+    }
+
     protected static void processIndices(AIMesh aiMesh, List<Integer> indices) {
         int numFaces = aiMesh.mNumFaces();
         AIFace.Buffer aiFaces = aiMesh.mFaces();
@@ -59,6 +86,7 @@ public class NewStaticMeshesLoader {
 
     protected static void processMaterial(AIMaterial aiMaterial, List<NewMaterial> materials,
             String texturesDir) throws Exception {
+
         AIColor4D colour = AIColor4D.create();
 
         AIString path = AIString.calloc();

@@ -1,18 +1,16 @@
-package gameData.Stages.MenuStage;
+package gameData.Stages.GameStage;
 
 import engine.assets.*;
 import engine.game.MainGameStage;
 import engine.io.Input;
 import engine.io.Timer;
 import engine.io.Window;
-import engine.render.Camera;
 import engine.render.Renderer;
 import gameData.Stages.Entitys.Calculator;
 import gameData.Stages.Entitys.Enemy;
 import gameData.Stages.Entitys.Player;
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
-import org.joml.Vector3d;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -21,10 +19,10 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 
-public class MenuStage extends MainGameStage {
+public class GameStage extends MainGameStage {
     private static final float MOUSE_SENSITIVITY = 0.2f;
     public final double frame_cap = 1.0 / 60.0; // в одной секунде 60 кадров
-    private MenuGui gui;
+    private GameGui gui;
     private boolean again = true, pause = true , stop = false;
     private double startTime;
     private double S7=0, S8=0;
@@ -38,12 +36,12 @@ public class MenuStage extends MainGameStage {
     private static double cameraRotation = 90;
     private static boolean auto = true;
 
-    public MenuStage() {
+    public GameStage() {
 
     }
 
     public void main() throws Exception {
-        gui = new MenuGui();
+        gui = new GameGui();
         gui.setSize(window.getWidth(), window.getHeight());
 
         double frame_time = 0;
@@ -69,7 +67,7 @@ public class MenuStage extends MainGameStage {
 //        Texture texture = new Texture("src/main/resources/8k_stars.jpg");
 //        Mesh mesh = new Mesh(positions, textCoords, indices, texture);
 
-        satelliteMesh = NewStaticMeshesLoader.load("src/main/resources/Satelite/Satellite.obj", "src/main/resources/Satelite/text");
+        satelliteMesh = NewStaticMeshesLoader.load("Satelite/Satellite.obj", "Satelite/text");
         Player satellite0 = new Player(satelliteMesh);
         satellite0.setPosition(-1000,0,0);
         satellite0.setScale(2);
@@ -82,7 +80,7 @@ public class MenuStage extends MainGameStage {
         gameItems.add(satellite1);
         satellit2 = satellite1;//////////////////////////////////////////////////
 
-        NewMesh[] mesh = NewStaticMeshesLoader.load("src/main/resources/untitled.obj", "src/main/resources/");
+        NewMesh[] mesh = NewStaticMeshesLoader.load("untitled/untitled.obj", "untitled");
         GameItem skyBox = new GameItem(mesh);
         skyBox.setPosition(0,-10, -20);
         skyBox.setScale((float) 0.01);

@@ -1,13 +1,13 @@
-package gameData.Stages.MenuStage;
+package gameData.Stages.GameStage;
 
 
 import engine.gui.Gui;
 import org.joml.Vector2f;
 
 
-public class MenuGui extends Gui {
+public class GameGui extends Gui {
 
-    public MenuGui() {
+    public GameGui() {
 
     }
     public void render() {

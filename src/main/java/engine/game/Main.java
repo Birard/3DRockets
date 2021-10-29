@@ -2,12 +2,9 @@ package engine.game;
 
 import engine.io.Input;
 import engine.io.Window;
-import gameData.Stages.MenuStage.MenuStage;
-import org.lwjgl.opengl.GL;
+import gameData.Stages.GameStage.GameStage;
 
-import static org.lwjgl.glfw.GLFW.glfwInit;
 import static org.lwjgl.glfw.GLFW.glfwTerminate;
-import static org.lwjgl.opengl.GL11.*;
 
 public class Main {
     public static MainGameStage main;
@@ -24,7 +21,7 @@ public class Main {
         Window.windows.createWindow("Game");
 
 
-        main = new MenuStage();
+        main = new GameStage();
         Input.input.start();
         gameLoop();
     }
