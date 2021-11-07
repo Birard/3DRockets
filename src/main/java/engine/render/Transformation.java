@@ -1,6 +1,7 @@
 package engine.render;
 
 import engine.assets.GameItem;
+import engine.render.Cameras.Camera;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -25,7 +26,6 @@ public class Transformation {
         Vector3f cameraPos = camera.getPosition();
 //        Vector3f rotation = camera.getRotation();
         Quaternionf rotationQ = camera.getRotation();
-
         viewMatrix.identity();
         // First do the rotation so camera rotates over its position
         viewMatrix.rotate(rotationQ);

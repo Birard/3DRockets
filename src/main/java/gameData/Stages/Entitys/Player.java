@@ -36,6 +36,11 @@ public class Player extends GameItem {
             super.rotationQ.rotateAxis((float)Math.toRadians(W3), new Vector3f(0f, 0f, 1f)).
                     rotateAxis((float)Math.toRadians(W2), new Vector3f(0f, 1f, 0f)).
                     rotateAxis((float)Math.toRadians(W1), new Vector3f(1f, 0f, 0f));
+
+//                rotationQ.rotateLocalZ((float)Math.toRadians(W3));
+//        rotationQ.rotateLocalY((float)Math.toRadians(W2));
+//        rotationQ.rotateLocalX((float)Math.toRadians(W1));
+
             M1 = 0; M2 = 0; M3 = 0;
         }
 

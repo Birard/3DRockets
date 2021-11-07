@@ -6,6 +6,7 @@ import engine.io.Input;
 import engine.io.Timer;
 import engine.io.Window;
 import engine.render.Renderer;
+import engine.render.Cameras.ThirdPersonCamera;
 import gameData.Stages.Entitys.Calculator;
 import gameData.Stages.Entitys.Enemy;
 import gameData.Stages.Entitys.Player;
@@ -23,21 +24,14 @@ public class GameStage extends MainGameStage {
     private static final float MOUSE_SENSITIVITY = 0.2f;
     public final double frame_cap = 1.0 / 60.0; // в одной секунде 60 кадров
     private GameGui gui;
-    private boolean again = true, pause = true , stop = false;
-    private double startTime;
-    private double S7=0, S8=0;
-    private ArrayList<GameItem> gameItems;
+    private boolean again = true, pause = true, closeWindow = false, auto = true;
     private Renderer renderer;
     private static final Window window = Window.windows;
-    private static Player satellit;///////////////////////////////////////////////////////
-    private static Enemy satellit2;
-    NewMesh[] satelliteMesh;
-    private static Vector3f cameraPosOnSatellite = new Vector3f(-20, 10, 0);
-    private static double cameraRotation = 90;
-    private static boolean auto = true;
+    private static Player player;
+    private static Enemy enemy;
+    NewMesh[] playerMesh;
 
     public GameStage() {
-
     }
 
     public void main() throws Exception {
@@ -49,53 +43,42 @@ public class GameStage extends MainGameStage {
 
         double time_2;
         double passed;
-
-        double timeWastLogik = 0, timeWastRender = 0, savedtime;
-
-
         double time = Timer.getTime(), unprocessed = 0;
-//        startTime = Timer.getTime();
         boolean can_render;
 
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 
         renderer = new Renderer();
+//        renderer.setCamera(new ThirdPersonCamera());
         renderer.init(window);
 
-        gameItems = new ArrayList<>();
+        ArrayList<GameItem> gameItems = new ArrayList<>();
 
-//        Texture texture = new Texture("src/main/resources/8k_stars.jpg");
-//        Mesh mesh = new Mesh(positions, textCoords, indices, texture);
-
-        satelliteMesh = NewStaticMeshesLoader.load("Satelite/Satellite.obj", "Satelite/text");
-        Player satellite0 = new Player(satelliteMesh);
-        satellite0.setPosition(-1000,0,0);
-        satellite0.setScale(2);
+        playerMesh = NewStaticMeshesLoader.load("Satellite/Satellite.obj", "Satellite/text");
+        Player satellite0 = new Player(playerMesh);
+        satellite0.setPosition(0,0,0);
+        satellite0.setScale((float) 2);
         gameItems.add(satellite0);
-        satellit = satellite0;//////////////////////////////////////////////////
+        player = satellite0;
 
-        Enemy satellite1 = new Enemy(satelliteMesh);
-        satellite1.setPosition(100,1000,100);
-        satellite1.setScale(2);
+        NewMesh[] satelliteMesh2 = NewStaticMeshesLoader.load("Torpedo1/Torpedo1.obj", "Torpedo1/text");
+        Enemy satellite1 = new Enemy(satelliteMesh2);
+        satellite1.setPosition(10,0,0);
+        satellite1.setScale(1);
         gameItems.add(satellite1);
-        satellit2 = satellite1;//////////////////////////////////////////////////
+        enemy = satellite1;
 
         NewMesh[] mesh = NewStaticMeshesLoader.load("untitled/untitled.obj", "untitled");
         GameItem skyBox = new GameItem(mesh);
-        skyBox.setPosition(0,-10, -20);
-        skyBox.setScale((float) 0.01);
+        skyBox.setPosition(renderer.camera.getPosition());
+        skyBox.setScale((float) 200);
         gameItems.add(skyBox);
-        ////////////////////////////////////////////////////////////////////////
-//        renderer.camera.setPosition(0,10,20);
-//        renderer.camera.setFocus(gameItems.get(0).getPosition());
+
         boolean firsTime = true;
 
-        int hidenConus = 5, timerrr = 0;
-        satelliteMesh[5].setNeedToRender(false);
-        startTime = Timer.getTime();
-        double starticTime = Timer.getTime();
-        //while (!window.shouldClose()) {
-        while (!stop && !window.windowShouldClose()) {
+        double timeOnGame = 0;
+
+        while (!closeWindow && !window.windowShouldClose()) {
             can_render = false;
             time_2 = Timer.getTime();
             passed = time_2 - time;
@@ -111,90 +94,59 @@ public class GameStage extends MainGameStage {
 
             if (again) {
                 again = false;
-                startTime = Timer.getTime();
+                firsTime=true;
+                timeOnGame = 0;
             }
 
-
-
             while (unprocessed >= frame_cap) {
-                savedtime = Timer.getTime();
                 unprocessed -= frame_cap;
                 can_render = true;
-                if (!pause) {
-                    gui.update();
-                    startTime = Timer.getTime();
-                } else startTime = Timer.getTime();
+                gui.update();
                 window.update();
-                timeWastLogik += Timer.getTime() - savedtime;
             }
 
             if (frame_time >= 1.0) {
                 frame_time = 0;
                 System.out.println("FPS: " + frames);
                 for(int i = 5; i <= 16; i++) {
-                    satelliteMesh[i].setNeedToRender(false);
+                    playerMesh[i].setNeedToRender(false);
                 }
                 frames = 0;
             }
             if (can_render) {
-                savedtime = Timer.getTime();
-
-
-
-
-                //////////////////////////////////////////////////////////////////////
-
-                satellit.updateRotate(frame_cap);
-//                satellit.move(frame_cap);
 
                 /////////////////////////////////////////////////////////////////////
-                Vector3f posF = satellit2.getPosition();
-                Vector3f posE = satellit.getPosition();
-                double TStar = Calculator.calculateTStar(satellit, satellit2);
-                if (firsTime || posE.distance(posF) < 1) {
+                Vector3f posF = enemy.getPosition();
+                Vector3f posE = player.getPosition();
+                double TStar = Calculator.calculateTStar(player, enemy);
+                if ((firsTime || posE.distance(posF) < 0.5) && !pause) {
+                    if(firsTime)System.out.println("* " + TStar);
+                    System.out.println(timeOnGame);
                     firsTime = false;
-                    System.out.println("* " + TStar);
-                    System.out.println(Timer.getTime() - starticTime);
-//                System.out.println(posE);
                 }
                 //повертаем догоняющего
                 Quaternionf qe2 = new Quaternionf();
 //                qe2 = Calculator.calculateQuaternion(TStar, satellit, satellit2);
                 qe2.rotateTo(new Vector3f(1,0,0),new Vector3f((posE.x - posF.x), (posE.y - posF.y), (posE.z - posF.z)));
-                satellit2.setQuatRotation(qe2);
-                if(auto) satellit.setQuatRotation(qe2);// для идеаль страт
-                if (pause) {
-                    satellit2.move(frame_cap);
-                    satellit.move(frame_cap);
+                enemy.setQuatRotation(qe2);
+                if(auto) {player.setQuatRotation(qe2);// для идеаль страт
+                     } else {player.updateRotate(frame_cap);}
+                if (!pause) {
+                    enemy.move(frame_cap);
+                    player.move(frame_cap);
+                    timeOnGame += frame_cap;
                 }
 //////////////////////////////////////////////////////////////////////
                 //шоб камера за игроком
-                Quaternionf quarS = new Quaternionf(satellit.getQuatRotation());
-                Vector3f vectorF = new Vector3f(cameraPosOnSatellite);
-                vectorF.rotate(quarS);
-                Vector3f posC = new Vector3f((posE.x + vectorF.x), (posE.y + vectorF.y), (posE.z + vectorF.z));
-                renderer.camera.setPosition(posC);
-                Quaternionf qe = new Quaternionf();
-                qe.rotateAxis((float) Math.toRadians(cameraRotation), new Vector3f(0,1,0));
-                qe.div(quarS);
-                renderer.camera.setRotation(qe);
+/////                ((ThirdPersonCamera)renderer.camera).setFocus(satellit);
+/////                ((ThirdPersonCamera)renderer.camera).updateRotation();
+/////                skyBox.setPosition(renderer.camera.getPosition());
 //////////////////////////////////////////////////////////////////////
-                /////////////////////////////////////////////////////////////////////
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-//                if(renderer.camera.isFocused())
-//                renderer.camera.setFocus(gameItems.get(0).getPosition());
-
-                // для скайблока щоб бути разом з камерою
-//                gameItems.get(gameItems.size()-1).setPosition(renderer.camera.getPosition());
-
                 renderer.render(window, gameItems);
-
                 gui.render();
                 window.swapBuffers();
-
                 frames++;
-                timeWastRender += Timer.getTime() - savedtime;
             }
 
         }
@@ -205,34 +157,37 @@ public class GameStage extends MainGameStage {
         switch (key) {
             case GLFW_KEY_ESCAPE:
                 glfwSetWindowShouldClose(window.getWindow(), true);
-                stop = true;
+                closeWindow = true;
                 break;
             case GLFW_KEY_KP_5:
             case GLFW_KEY_5:
-                satellit.setPosition(-1000,0,0);
-                satellit2.setPosition(100,1000,100);
-                cameraPosOnSatellite = new Vector3f(-20, 10, 0);
-                cameraRotation = 90;
+                player.setPosition(0,0,0);
+                enemy.setPosition(100,1000,100);
+/////                ((ThirdPersonCamera)renderer.camera).cameraPosOnFocus = new Vector3f(-20, 10, 0);
+                break;
+            case GLFW_KEY_KP_ADD:
+            case GLFW_KEY_EQUAL:
+                renderer.camera.move(0, (float) +0.1,0);
+                break;
+            case GLFW_KEY_MINUS:
+            case GLFW_KEY_KP_SUBTRACT:
+                renderer.camera.move(0, (float) -0.1,0);
                 break;
             case GLFW_KEY_KP_8:
             case GLFW_KEY_8:
-                cameraPosOnSatellite = new Vector3f(30, 10, 0);
-                cameraRotation = -90;
+                renderer.camera.move(0,0, (float) -0.1);
                 break;
             case GLFW_KEY_KP_2:
             case GLFW_KEY_2:
-                cameraPosOnSatellite = new Vector3f(-30, 10, 0);
-                cameraRotation = 90;
+                renderer.camera.move(0,0, (float) 0.1);
                 break;
             case GLFW_KEY_KP_6:
             case GLFW_KEY_6:
-                cameraPosOnSatellite = new Vector3f(0, 10, 30);
-                cameraRotation = 0;
+                renderer.camera.move((float) 0.1,0,0);
                 break;
             case GLFW_KEY_KP_4:
             case GLFW_KEY_4:
-                cameraPosOnSatellite = new Vector3f(0, 10, -30);
-                cameraRotation = 180;
+                renderer.camera.move((float) -0.1,0,0);
                 break;
             case GLFW_KEY_KP_3:
             case GLFW_KEY_3:
@@ -240,26 +195,6 @@ public class GameStage extends MainGameStage {
                 auto = !auto;
                 }
                 break;
-//            case GLFW_KEY_KP_ADD:
-//                cameraPosOnSatellite = new Vector3f(-20, 10, 0);
-//                break;
-//            case GLFW_KEY_SPACE:
-////                renderer.camera.movePosition(0, (float) 0.1,0);
-//                satellit.move(frame_cap);
-////                System.out.println("dsdsdsd");
-//                break;
-//            case GLFW_KEY_O:
-//                S7+=0.1;
-////                renderer.camera.movePosition(0, 0,(float) -0.1);
-//                break;
-//            case GLFW_KEY_L:
-//                S8+=0.1;
-////                renderer.camera.movePosition(0, 0,(float) -0.1);
-//                break;
-//            case GLFW_KEY_N:
-////                window.swapBuffers();
-////                again = true;
-//                break;
 //            case GLFW_KEY_F:
 ////                if(renderer.camera.isFocused()) renderer.camera.setFocused(false);
 ////                else
@@ -267,49 +202,35 @@ public class GameStage extends MainGameStage {
 //                satellit2.move(frame_cap);
 //                break;
             case GLFW_KEY_S:
-                satelliteMesh[9].setNeedToRender(true);
-                satelliteMesh[12].setNeedToRender(true);
-                satellit.setControls(satellit.M1,satellit.M2,1);
+                player.setControls(player.M1,player.M2,1);
+                playerMesh[9].setNeedToRender(true);
+                playerMesh[12].setNeedToRender(true);
                 break;
             case GLFW_KEY_W:
-                satelliteMesh[10].setNeedToRender(true);
-                satelliteMesh[11].setNeedToRender(true);
-                satellit.setControls(satellit.M1,satellit.M2,-1);
+                player.setControls(player.M1,player.M2,-1);
+                playerMesh[10].setNeedToRender(true);
+                playerMesh[11].setNeedToRender(true);
                 break;
             case GLFW_KEY_D:
-                satelliteMesh[5].setNeedToRender(true);
-                satelliteMesh[6].setNeedToRender(true);
-                satellit.setControls(+1,satellit.M2,satellit.M3);
+                player.setControls(+1,player.M2,player.M3);
+                playerMesh[5].setNeedToRender(true);
+                playerMesh[6].setNeedToRender(true);
                 break;
             case GLFW_KEY_A:
-                satelliteMesh[7].setNeedToRender(true);
-                satelliteMesh[8].setNeedToRender(true);
-                satellit.setControls(-1,satellit.M2,satellit.M3);
+                player.setControls(-1,player.M2,player.M3);
+                playerMesh[7].setNeedToRender(true);
+                playerMesh[8].setNeedToRender(true);
                 break;
             case GLFW_KEY_E:
-                satelliteMesh[13].setNeedToRender(true);
-                satelliteMesh[15].setNeedToRender(true);
-                satellit.setControls(satellit.M1,-1,satellit.M3);
+                player.setControls(player.M1,-1,player.M3);
+                playerMesh[13].setNeedToRender(true);
+                playerMesh[15].setNeedToRender(true);
                 break;
             case GLFW_KEY_Q:
-                satelliteMesh[14].setNeedToRender(true);
-                satelliteMesh[16].setNeedToRender(true);
-                satellit.setControls(satellit.M1,1,satellit.M3);
+                player.setControls(player.M1,1,player.M3);
+                playerMesh[14].setNeedToRender(true);
+                playerMesh[16].setNeedToRender(true);
                 break;
-
-//            case GLFW_KEY_KP_5:
-//            case GLFW_KEY_5:
-//                if(Input.isKeyPressed(key)) {
-//                    satelliteMesh[5].setNeedToRender(false);
-//                    satelliteMesh[6].setNeedToRender(false); satelliteMesh[11].setNeedToRender(false);
-//                    satelliteMesh[7].setNeedToRender(false); satelliteMesh[13].setNeedToRender(false);
-//                    satelliteMesh[8].setNeedToRender(false); satelliteMesh[15].setNeedToRender(false);
-//                    satelliteMesh[9].setNeedToRender(false); satelliteMesh[14].setNeedToRender(false);
-//                    satelliteMesh[12].setNeedToRender(false); satelliteMesh[16].setNeedToRender(false);
-//                    satelliteMesh[10].setNeedToRender(false);
-//                    gameItems.get(0).setQuatRotation(new Quaternionf(0,0,0,1));
-//                }
-//                break;
             case GLFW_KEY_1:
             case GLFW_KEY_KP_1:
                 if(Input.isKeyPressed(key)) {
@@ -320,9 +241,6 @@ public class GameStage extends MainGameStage {
         }
     }
 
-    public void stop(){
-        stop = true;
-    }
 
     public void mouseButtonIsPressed(int mouseButton) {
         switch (mouseButton) {

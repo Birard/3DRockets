@@ -3,6 +3,7 @@ package engine.render;
 import engine.assets.GameItem;
 import engine.assets.Mesh;
 import engine.io.Window;
+import engine.render.Cameras.Camera;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -25,6 +26,10 @@ public class Renderer {
 
     public Renderer() {
         transformation = new Transformation();
+    }
+
+    public void setCamera(Camera camera) {
+        this.camera = camera;
     }
 
     public void init(Window window){
