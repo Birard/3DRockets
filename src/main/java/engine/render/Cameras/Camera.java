@@ -12,7 +12,6 @@ public class Camera {
     public Camera() {
         position = new Vector3f();
         rotationQ = new Quaternionf();
-
     }
 
     public Camera(Vector3f position, Quaternionf rotation) {
@@ -41,15 +40,6 @@ public class Camera {
 
 
     public void moveRotation(float offsetX, float offsetY, float offsetZ) {
-//        Quaternionf q = new Quaternionf(rotationQ);
-//        q.rotateAxis((float) Math.toRadians(offsetZ), new Vector3f(0f, 0f, 1f).rotate(rotationQ)).
-//            rotateAxis((float) Math.toRadians(offsetY), new Vector3f(0f, 1f, 0f).rotate(rotationQ)).
-//            rotateAxis((float) Math.toRadians(offsetX), new Vector3f(1f, 0f, 0f).rotate(rotationQ));
-
-//        rotationQ.rotateAxis((float) Math.toRadians(offsetZ), new Vector3f(0f, 0f, 1f)).
-//                rotateAxis((float) Math.toRadians(offsetY), new Vector3f(0f, 1f, 0f)).
-//                rotateAxis((float) Math.toRadians(offsetX), new Vector3f(1f, 0f, 0f));
-
         rotationQ.rotateLocalZ((float)Math.toRadians(offsetZ));
         rotationQ.rotateLocalY((float)Math.toRadians(offsetY));
         rotationQ.rotateLocalX((float)Math.toRadians(offsetX));
@@ -62,7 +52,6 @@ public class Camera {
         q.div(rotationQ);
         vectorF.rotate(q);
         position.add(new Vector3f((vectorF.x), (vectorF.y), (vectorF.z)));
-
     }
 
 

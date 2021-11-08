@@ -10,6 +10,7 @@ import engine.render.Cameras.ThirdPersonCamera;
 import gameData.Stages.Entitys.Calculator;
 import gameData.Stages.Entitys.Enemy;
 import gameData.Stages.Entitys.Player;
+import gameData.Stages.Entitys.TracerManager;
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -28,8 +29,8 @@ public class GameStage extends MainGameStage {
     private Renderer renderer;
     private static final Window window = Window.windows;
     private static Player player;
-    private static Enemy enemy;
-    NewMesh[] playerMesh;
+    public static Enemy enemy;
+    public ArrayList<GameItem> gameItems = new ArrayList<>();
 
     public GameStage() {
     }
@@ -49,30 +50,34 @@ public class GameStage extends MainGameStage {
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 
         renderer = new Renderer();
-//        renderer.setCamera(new ThirdPersonCamera());
+        renderer.setCamera(new ThirdPersonCamera());
         renderer.init(window);
 
-        ArrayList<GameItem> gameItems = new ArrayList<>();
+        NewMesh[] playerMesh = NewStaticMeshesLoader.load("Satellite/Satellite.obj", "Satellite/text");
+        Player satelliteP = new Player(playerMesh);
+        satelliteP.setPosition(0,0,0);
+        satelliteP.setScale((float) 2);
+        gameItems.add(satelliteP);
+        player = satelliteP;
+        ((ThirdPersonCamera)renderer.camera).setFocus(player);
+        ((ThirdPersonCamera)renderer.camera).setFocusedOpposite();
+        renderer.camera.setPosition(1,0,0);
 
-        playerMesh = NewStaticMeshesLoader.load("Satellite/Satellite.obj", "Satellite/text");
-        Player satellite0 = new Player(playerMesh);
-        satellite0.setPosition(0,0,0);
-        satellite0.setScale((float) 2);
-        gameItems.add(satellite0);
-        player = satellite0;
 
-        NewMesh[] satelliteMesh2 = NewStaticMeshesLoader.load("Torpedo1/Torpedo1.obj", "Torpedo1/text");
-        Enemy satellite1 = new Enemy(satelliteMesh2);
-        satellite1.setPosition(10,0,0);
-        satellite1.setScale(1);
-        gameItems.add(satellite1);
-        enemy = satellite1;
+        NewMesh[] enemyMesh = NewStaticMeshesLoader.load("Torpedo1/Torpedo1.obj", "Torpedo1/text");
+        Enemy torpedoEn = new Enemy(enemyMesh);
+        torpedoEn.setPosition(10,0,0);
+        torpedoEn.setScale(1);
+        gameItems.add(torpedoEn);
+        enemy = torpedoEn;
 
-        NewMesh[] mesh = NewStaticMeshesLoader.load("untitled/untitled.obj", "untitled");
-        GameItem skyBox = new GameItem(mesh);
-        skyBox.setPosition(renderer.camera.getPosition());
-        skyBox.setScale((float) 200);
-        gameItems.add(skyBox);
+//        NewMesh[] mesh = NewStaticMeshesLoader.load("untitled/untitled.obj", "untitled/skyBox");
+//        GameItem skyBox = new GameItem(mesh);
+//        skyBox.setPosition(renderer.camera.getPosition());
+//        skyBox.setScale((float) 400);
+//        gameItems.add(skyBox);
+
+        TracerManager tracerManager = new TracerManager();
 
         boolean firsTime = true;
 
@@ -108,9 +113,7 @@ public class GameStage extends MainGameStage {
             if (frame_time >= 1.0) {
                 frame_time = 0;
                 System.out.println("FPS: " + frames);
-                for(int i = 5; i <= 16; i++) {
-                    playerMesh[i].setNeedToRender(false);
-                }
+                player.offAllManeuversRender();
                 frames = 0;
             }
             if (can_render) {
@@ -138,12 +141,15 @@ public class GameStage extends MainGameStage {
                 }
 //////////////////////////////////////////////////////////////////////
                 //шоб камера за игроком
-/////                ((ThirdPersonCamera)renderer.camera).setFocus(satellit);
-/////                ((ThirdPersonCamera)renderer.camera).updateRotation();
-/////                skyBox.setPosition(renderer.camera.getPosition());
+//                ((ThirdPersonCamera)renderer.camera).setFocus(player);
+                ((ThirdPersonCamera)renderer.camera).updateCamPos();
+//                skyBox.setPosition(renderer.camera.getPosition());
 //////////////////////////////////////////////////////////////////////
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                renderer.render(window, gameItems);
+                ArrayList<GameItem> gameItems2 = new ArrayList<>();
+                gameItems2.addAll(gameItems);
+                gameItems2.addAll(tracerManager.gameItems);
+                renderer.render(window, gameItems2);
                 gui.render();
                 window.swapBuffers();
                 frames++;
@@ -163,80 +169,89 @@ public class GameStage extends MainGameStage {
             case GLFW_KEY_5:
                 player.setPosition(0,0,0);
                 enemy.setPosition(100,1000,100);
-/////                ((ThirdPersonCamera)renderer.camera).cameraPosOnFocus = new Vector3f(-20, 10, 0);
                 break;
             case GLFW_KEY_KP_ADD:
             case GLFW_KEY_EQUAL:
-                renderer.camera.move(0, (float) +0.1,0);
+                ((ThirdPersonCamera) renderer.camera).addLengthToFocus();
                 break;
             case GLFW_KEY_MINUS:
             case GLFW_KEY_KP_SUBTRACT:
+                ((ThirdPersonCamera) renderer.camera).subtractLengthToFocus();
+                break;
+            case GLFW_KEY_I:
+                renderer.camera.move(0, (float) +0.1,0);
+                break;
+            case GLFW_KEY_K:
                 renderer.camera.move(0, (float) -0.1,0);
                 break;
-            case GLFW_KEY_KP_8:
-            case GLFW_KEY_8:
+            case GLFW_KEY_Y:
                 renderer.camera.move(0,0, (float) -0.1);
                 break;
-            case GLFW_KEY_KP_2:
-            case GLFW_KEY_2:
+            case GLFW_KEY_H:
                 renderer.camera.move(0,0, (float) 0.1);
                 break;
-            case GLFW_KEY_KP_6:
-            case GLFW_KEY_6:
+            case GLFW_KEY_J:
                 renderer.camera.move((float) 0.1,0,0);
                 break;
-            case GLFW_KEY_KP_4:
-            case GLFW_KEY_4:
+            case GLFW_KEY_G:
                 renderer.camera.move((float) -0.1,0,0);
                 break;
-            case GLFW_KEY_KP_3:
-            case GLFW_KEY_3:
+            case GLFW_KEY_T:
+                renderer.camera.moveRotation(0, 0, -1);
+                break;
+            case GLFW_KEY_U:
+                renderer.camera.moveRotation(0, 0, 1);
+                break;
+            case GLFW_KEY_Z:
                 if(Input.isKeyPressed(key)) {
                 auto = !auto;
                 }
                 break;
-//            case GLFW_KEY_F:
-////                if(renderer.camera.isFocused()) renderer.camera.setFocused(false);
-////                else
-////                renderer.camera.setFocus(gameItems.get(0).getPosition());
-//                satellit2.move(frame_cap);
-//                break;
-            case GLFW_KEY_S:
-                player.setControls(player.M1,player.M2,1);
-                playerMesh[9].setNeedToRender(true);
-                playerMesh[12].setNeedToRender(true);
-                break;
-            case GLFW_KEY_W:
-                player.setControls(player.M1,player.M2,-1);
-                playerMesh[10].setNeedToRender(true);
-                playerMesh[11].setNeedToRender(true);
-                break;
-            case GLFW_KEY_D:
-                player.setControls(+1,player.M2,player.M3);
-                playerMesh[5].setNeedToRender(true);
-                playerMesh[6].setNeedToRender(true);
-                break;
-            case GLFW_KEY_A:
-                player.setControls(-1,player.M2,player.M3);
-                playerMesh[7].setNeedToRender(true);
-                playerMesh[8].setNeedToRender(true);
-                break;
-            case GLFW_KEY_E:
-                player.setControls(player.M1,-1,player.M3);
-                playerMesh[13].setNeedToRender(true);
-                playerMesh[15].setNeedToRender(true);
-                break;
-            case GLFW_KEY_Q:
-                player.setControls(player.M1,1,player.M3);
-                playerMesh[14].setNeedToRender(true);
-                playerMesh[16].setNeedToRender(true);
-                break;
-            case GLFW_KEY_1:
-            case GLFW_KEY_KP_1:
+            case GLFW_KEY_P:
                 if(Input.isKeyPressed(key)) {
                     pause = !pause;
                     System.out.println(pause);
                 }
+                break;
+            case GLFW_KEY_F:
+                if(Input.isKeyPressed(key)) {
+                    ((ThirdPersonCamera) renderer.camera).setFocusedOpposite();
+                }
+                break;
+            case GLFW_KEY_V:
+                if(Input.isKeyPressed(key)) {
+                    ((ThirdPersonCamera) renderer.camera).setHardFocusedOpposite();
+                }
+                break;
+            case GLFW_KEY_S:
+                player.setControls(player.M1,player.M2,1);
+                player.onManeuverRender(9);
+                player.onManeuverRender(12);
+                break;
+            case GLFW_KEY_W:
+                player.setControls(player.M1,player.M2,-1);
+                player.onManeuverRender(10);
+                player.onManeuverRender(11);
+                break;
+            case GLFW_KEY_D:
+                player.setControls(+1,player.M2,player.M3);
+                player.onManeuverRender(5);
+                player.onManeuverRender(6);
+                break;
+            case GLFW_KEY_A:
+                player.setControls(-1,player.M2,player.M3);
+                player.onManeuverRender(7);
+                player.onManeuverRender(8);
+                break;
+            case GLFW_KEY_E:
+                player.setControls(player.M1,-1,player.M3);
+                player.onManeuverRender(13);
+                player.onManeuverRender(15);
+                break;
+            case GLFW_KEY_Q:
+                player.setControls(player.M1,1,player.M3);
+                player.onManeuverRender(14);
+                player.onManeuverRender(16);
                 break;
         }
     }

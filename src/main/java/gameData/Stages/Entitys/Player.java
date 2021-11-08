@@ -51,4 +51,15 @@ public class Player extends GameItem {
             super.position.add(new Vector3f((float)(vectorF.x * deltaT), (float)(vectorF.y * deltaT), (float)(vectorF.z * deltaT)));
         }
 
+
+        public void offAllManeuversRender () {
+            for(int i = 5; i <= 16; i++) {
+                newMesh[i].setNeedToRender(false);
+            }
+        }
+
+
+        public void onManeuverRender(int i) {
+            newMesh[i].setNeedToRender(true);
+        }
 }

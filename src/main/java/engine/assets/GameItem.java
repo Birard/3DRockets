@@ -8,7 +8,7 @@ import org.joml.Vector3f;
 public class GameItem {
 
     private  Mesh mesh;
-    private  NewMesh[] newMesh;
+    protected  NewMesh[] newMesh;
     protected final Vector3f position;
     private float scale;
     protected Quaternionf rotationQ;
