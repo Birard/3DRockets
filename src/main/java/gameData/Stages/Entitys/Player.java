@@ -9,7 +9,7 @@ public class Player extends GameItem {
 
     public double M1=0, M2=0, M3=0;// включены или нет ускорители
     double J1=250, J2=250, J3=250;// силы ускорителей
-    float power = 30;
+    float power = 10;
 
 
     public Player(NewMesh[] mesh1) {
@@ -53,7 +53,7 @@ public class Player extends GameItem {
 
 
         public void offAllManeuversRender () {
-            for(int i = 5; i <= 16; i++) {
+            for(int i = 3; i <= 14; i++) {
                 newMesh[i].setNeedToRender(false);
             }
         }

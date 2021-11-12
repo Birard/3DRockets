@@ -11,7 +11,7 @@ public class Enemy extends GameItem {
 
 //    отета с формул
 //  private Vector3d speed = new Vector3d(0,0,0);
-    private final float power = 100;
+    private final float power = 20;
     private final float k = 1;
 
 

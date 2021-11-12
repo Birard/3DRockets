@@ -25,11 +25,13 @@ public class GameStage extends MainGameStage {
     private static final float MOUSE_SENSITIVITY = 0.2f;
     public final double frame_cap = 1.0 / 60.0; // в одной секунде 60 кадров
     private GameGui gui;
-    private boolean again = true, pause = true, closeWindow = false, auto = true;
+    private boolean again = true, pause = true, closeWindow = false, auto = true, firsTime = true;;
     private Renderer renderer;
     private static final Window window = Window.windows;
     private static Player player;
     public static Enemy enemy;
+    private static TracerManager playerTraces;
+    private static TracerManager enemyTraces;
     public ArrayList<GameItem> gameItems = new ArrayList<>();
 
     public GameStage() {
@@ -53,7 +55,7 @@ public class GameStage extends MainGameStage {
         renderer.setCamera(new ThirdPersonCamera());
         renderer.init(window);
 
-        NewMesh[] playerMesh = NewStaticMeshesLoader.load("Satellite/Satellite.obj", "Satellite/text");
+        NewMesh[] playerMesh = NewStaticMeshesLoader.load("Satellite.obj", "Satellite/text");
         Player satelliteP = new Player(playerMesh);
         satelliteP.setPosition(0,0,0);
         satelliteP.setScale((float) 2);
@@ -77,11 +79,17 @@ public class GameStage extends MainGameStage {
 //        skyBox.setScale((float) 400);
 //        gameItems.add(skyBox);
 
-        TracerManager tracerManager = new TracerManager();
+        NewMesh[] mesh = NewStaticMeshesLoader.load("arrow.obj", "untitled/whiteBox");
+        playerTraces = new TracerManager(mesh);
+        gameItems.addAll(playerTraces.gameItems);
 
-        boolean firsTime = true;
+        NewMesh[] mesh2 = NewStaticMeshesLoader.load("arrow.obj", "untitled/blackBox");
+        enemyTraces = new TracerManager(mesh2);
+        gameItems.addAll(enemyTraces.gameItems);
 
         double timeOnGame = 0;
+
+        int skippedFrames = 0;
 
         while (!closeWindow && !window.windowShouldClose()) {
             can_render = false;
@@ -138,6 +146,12 @@ public class GameStage extends MainGameStage {
                     enemy.move(frame_cap);
                     player.move(frame_cap);
                     timeOnGame += frame_cap;
+                    if(skippedFrames == 3)enemyTraces.createTrace(enemy.getPosition(), enemy.getQuatRotation());
+                    if(skippedFrames == 6) {
+                        playerTraces.createTrace(player.getPosition(), player.getQuatRotation());
+                        enemyTraces.createTrace(enemy.getPosition(), enemy.getQuatRotation());
+                        skippedFrames = 0;
+                    } else skippedFrames++;
                 }
 //////////////////////////////////////////////////////////////////////
                 //шоб камера за игроком
@@ -146,10 +160,7 @@ public class GameStage extends MainGameStage {
 //                skyBox.setPosition(renderer.camera.getPosition());
 //////////////////////////////////////////////////////////////////////
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                ArrayList<GameItem> gameItems2 = new ArrayList<>();
-                gameItems2.addAll(gameItems);
-                gameItems2.addAll(tracerManager.gameItems);
-                renderer.render(window, gameItems2);
+                renderer.render(window, gameItems);
                 gui.render();
                 window.swapBuffers();
                 frames++;
@@ -168,7 +179,10 @@ public class GameStage extends MainGameStage {
             case GLFW_KEY_KP_5:
             case GLFW_KEY_5:
                 player.setPosition(0,0,0);
-                enemy.setPosition(100,1000,100);
+                enemy.setPosition(100,100,100);
+                playerTraces.resetPoses();
+                enemyTraces.resetPoses();
+                firsTime = true;
                 break;
             case GLFW_KEY_KP_ADD:
             case GLFW_KEY_EQUAL:
@@ -225,33 +239,33 @@ public class GameStage extends MainGameStage {
                 break;
             case GLFW_KEY_S:
                 player.setControls(player.M1,player.M2,1);
-                player.onManeuverRender(9);
-                player.onManeuverRender(12);
+                player.onManeuverRender(9-2);
+                player.onManeuverRender(12-2);
                 break;
             case GLFW_KEY_W:
                 player.setControls(player.M1,player.M2,-1);
-                player.onManeuverRender(10);
-                player.onManeuverRender(11);
+                player.onManeuverRender(10-2);
+                player.onManeuverRender(11-2);
                 break;
             case GLFW_KEY_D:
                 player.setControls(+1,player.M2,player.M3);
-                player.onManeuverRender(5);
-                player.onManeuverRender(6);
+                player.onManeuverRender(5-2);
+                player.onManeuverRender(6-2);
                 break;
             case GLFW_KEY_A:
                 player.setControls(-1,player.M2,player.M3);
-                player.onManeuverRender(7);
-                player.onManeuverRender(8);
+                player.onManeuverRender(7-2);
+                player.onManeuverRender(8-2);
                 break;
             case GLFW_KEY_E:
                 player.setControls(player.M1,-1,player.M3);
-                player.onManeuverRender(13);
-                player.onManeuverRender(15);
+                player.onManeuverRender(13-2);
+                player.onManeuverRender(15-2);
                 break;
             case GLFW_KEY_Q:
                 player.setControls(player.M1,1,player.M3);
-                player.onManeuverRender(14);
-                player.onManeuverRender(16);
+                player.onManeuverRender(14-2);
+                player.onManeuverRender(16-2);
                 break;
         }
     }

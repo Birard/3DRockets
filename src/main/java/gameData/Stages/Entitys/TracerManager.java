@@ -3,6 +3,7 @@ package gameData.Stages.Entitys;
 import engine.assets.GameItem;
 import engine.assets.NewMesh;
 import engine.assets.NewStaticMeshesLoader;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -10,18 +11,28 @@ import java.util.ArrayList;
 public class TracerManager {
 
     public ArrayList<GameItem> gameItems = new ArrayList<>();
+    private int nowTrace = 0;
 
-    public TracerManager() {
-        NewMesh[] mesh = new NewMesh[0];
-        try {
-            mesh = NewStaticMeshesLoader.load("untitled/untitled.obj", "untitled/whiteBox");
-        } catch (Exception e) {
-            e.printStackTrace();
+    public TracerManager(NewMesh[] mesh1) {
+        for(int i = 0; i<1000 ; i++) {
+            GameItem box = new GameItem(mesh1);
+            box.setPosition(new Vector3f(0, 0, 0));
+            box.setScale(1);
+            gameItems.add(box);
         }
-        for(int i = 0; i <500; i++) {
-            GameItem skyBox = new GameItem(mesh);
-            skyBox.setPosition(new Vector3f(3*i, 3, 3));
-            gameItems.add(skyBox);
+    }
+
+    public void createTrace(Vector3f pos, Quaternionf quaternionf) {
+        if(nowTrace == gameItems.size()) nowTrace = 0;
+        gameItems.get(nowTrace).setPosition(pos);
+        gameItems.get(nowTrace).setQuatRotation(new Quaternionf(quaternionf));
+        nowTrace++;
+    }
+
+    public void resetPoses() {
+        for(int i = 0; i<1000 ; i++) {
+            gameItems.get(i).setPosition(new Vector3f(0,0,0));
+            gameItems.get(i).setQuatRotation(new Quaternionf());
         }
     }
 }
