@@ -49,7 +49,9 @@ public class ThirdPersonCamera extends Camera {
     }
 
 
-
+    public void setFocused(boolean isFocused) {
+                focused = isFocused;
+    }
 
     public void setFocusedOpposite() {
         focused = !focused;

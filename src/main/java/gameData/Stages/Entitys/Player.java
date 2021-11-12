@@ -53,9 +53,11 @@ public class Player extends GameItem {
 
 
         public void offAllManeuversRender () {
-            for(int i = 3; i <= 14; i++) {
+            for(int i = 5; i <= 16; i++) {
                 newMesh[i].setNeedToRender(false);
             }
+//            newMesh[2].setNeedToRender(false);
+//            newMesh[1].setNeedToRender(false);
         }
 
 

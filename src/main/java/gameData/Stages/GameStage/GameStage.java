@@ -25,7 +25,7 @@ public class GameStage extends MainGameStage {
     private static final float MOUSE_SENSITIVITY = 0.2f;
     public final double frame_cap = 1.0 / 60.0; // в одной секунде 60 кадров
     private GameGui gui;
-    private boolean again = true, pause = true, closeWindow = false, auto = true, firsTime = true;;
+    private boolean again = true, pause = true, closeWindow = false, auto = true, endGame = false;
     private Renderer renderer;
     private static final Window window = Window.windows;
     private static Player player;
@@ -55,7 +55,7 @@ public class GameStage extends MainGameStage {
         renderer.setCamera(new ThirdPersonCamera());
         renderer.init(window);
 
-        NewMesh[] playerMesh = NewStaticMeshesLoader.load("Satellite.obj", "Satellite/text");
+        NewMesh[] playerMesh = NewStaticMeshesLoader.load("Satellite/Satellite.obj", "Satellite/text");
         Player satelliteP = new Player(playerMesh);
         satelliteP.setPosition(0,0,0);
         satelliteP.setScale((float) 2);
@@ -80,11 +80,11 @@ public class GameStage extends MainGameStage {
 //        gameItems.add(skyBox);
 
         NewMesh[] mesh = NewStaticMeshesLoader.load("arrow.obj", "untitled/whiteBox");
-        playerTraces = new TracerManager(mesh);
+        playerTraces = new TracerManager(mesh, 300);
         gameItems.addAll(playerTraces.gameItems);
 
         NewMesh[] mesh2 = NewStaticMeshesLoader.load("arrow.obj", "untitled/blackBox");
-        enemyTraces = new TracerManager(mesh2);
+        enemyTraces = new TracerManager(mesh2, 600);
         gameItems.addAll(enemyTraces.gameItems);
 
         double timeOnGame = 0;
@@ -107,8 +107,13 @@ public class GameStage extends MainGameStage {
 
             if (again) {
                 again = false;
-                firsTime=true;
+                endGame = false;
                 timeOnGame = 0;
+                player.setPosition(0,0,0);
+                enemy.setPosition(200,200,200);
+                playerTraces.resetPoses();
+                enemyTraces.resetPoses();
+                ((ThirdPersonCamera)renderer.camera).setFocused(true);
             }
 
             while (unprocessed >= frame_cap) {
@@ -120,45 +125,56 @@ public class GameStage extends MainGameStage {
 
             if (frame_time >= 1.0) {
                 frame_time = 0;
-                System.out.println("FPS: " + frames);
+//                System.out.println("FPS: " + frames);
                 player.offAllManeuversRender();
                 frames = 0;
             }
             if (can_render) {
+                if(!endGame) {
 
-                /////////////////////////////////////////////////////////////////////
-                Vector3f posF = enemy.getPosition();
-                Vector3f posE = player.getPosition();
-                double TStar = Calculator.calculateTStar(player, enemy);
-                if ((firsTime || posE.distance(posF) < 0.5) && !pause) {
-                    if(firsTime)System.out.println("* " + TStar);
-                    System.out.println(timeOnGame);
-                    firsTime = false;
-                }
-                //повертаем догоняющего
-                Quaternionf qe2 = new Quaternionf();
+                    /////////////////////////////////////////////////////////////////////
+                    Vector3f posF = enemy.getPosition();
+                    Vector3f posE = player.getPosition();
+                    double TStar = Calculator.calculateTStar(player, enemy)-1.2;
+
+                    if (timeOnGame == 0 && !pause) System.out.println("* " + TStar);
+                    if (posE.distance(posF) < 0.1 && !endGame) {
+                        timeOnGame += frame_cap;
+                        System.out.println(timeOnGame);
+                        endGame = true;
+                    }
+
+                    //повертаем догоняющего
+                    Quaternionf qe2 = new Quaternionf();
 //                qe2 = Calculator.calculateQuaternion(TStar, satellit, satellit2);
-                qe2.rotateTo(new Vector3f(1,0,0),new Vector3f((posE.x - posF.x), (posE.y - posF.y), (posE.z - posF.z)));
-                enemy.setQuatRotation(qe2);
-                if(auto) {player.setQuatRotation(qe2);// для идеаль страт
-                     } else {player.updateRotate(frame_cap);}
-                if (!pause) {
-                    enemy.move(frame_cap);
-                    player.move(frame_cap);
-                    timeOnGame += frame_cap;
-                    if(skippedFrames == 3)enemyTraces.createTrace(enemy.getPosition(), enemy.getQuatRotation());
-                    if(skippedFrames == 6) {
-                        playerTraces.createTrace(player.getPosition(), player.getQuatRotation());
-                        enemyTraces.createTrace(enemy.getPosition(), enemy.getQuatRotation());
-                        skippedFrames = 0;
-                    } else skippedFrames++;
-                }
+                    qe2.rotateTo(new Vector3f(1, 0, 0), new Vector3f((posE.x - posF.x), (posE.y - posF.y), (posE.z - posF.z)));
+                    enemy.setQuatRotation(qe2);
+                    if (auto) {
+                        player.setQuatRotation(qe2);// для идеаль страт
+                    } else {
+                        player.updateRotate(frame_cap);
+                    }
+                    if (!pause) {
+                        enemy.move(frame_cap);
+                        player.move(frame_cap);
+                        timeOnGame += frame_cap;
+                        if (skippedFrames == 3) enemyTraces.createTrace(enemy.getPosition(), enemy.getQuatRotation());
+                        if (skippedFrames == 6) {
+                            playerTraces.createTrace(player.getPosition(), player.getQuatRotation());
+                            enemyTraces.createTrace(enemy.getPosition(), enemy.getQuatRotation());
+                            skippedFrames = 0;
+                        } else skippedFrames++;
+                    }
 //////////////////////////////////////////////////////////////////////
-                //шоб камера за игроком
+                    //шоб камера за игроком
 //                ((ThirdPersonCamera)renderer.camera).setFocus(player);
-                ((ThirdPersonCamera)renderer.camera).updateCamPos();
+                    ((ThirdPersonCamera) renderer.camera).updateCamPos();
 //                skyBox.setPosition(renderer.camera.getPosition());
 //////////////////////////////////////////////////////////////////////
+                } else {
+                    ((ThirdPersonCamera) renderer.camera).setFocused(false);
+                }
+
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 renderer.render(window, gameItems);
                 gui.render();
@@ -178,11 +194,9 @@ public class GameStage extends MainGameStage {
                 break;
             case GLFW_KEY_KP_5:
             case GLFW_KEY_5:
-                player.setPosition(0,0,0);
-                enemy.setPosition(100,100,100);
-                playerTraces.resetPoses();
-                enemyTraces.resetPoses();
-                firsTime = true;
+                if(Input.isKeyPressed(key)) {
+                    again = true;
+                }
                 break;
             case GLFW_KEY_KP_ADD:
             case GLFW_KEY_EQUAL:
@@ -224,7 +238,6 @@ public class GameStage extends MainGameStage {
             case GLFW_KEY_P:
                 if(Input.isKeyPressed(key)) {
                     pause = !pause;
-                    System.out.println(pause);
                 }
                 break;
             case GLFW_KEY_F:
@@ -239,33 +252,33 @@ public class GameStage extends MainGameStage {
                 break;
             case GLFW_KEY_S:
                 player.setControls(player.M1,player.M2,1);
-                player.onManeuverRender(9-2);
-                player.onManeuverRender(12-2);
+                player.onManeuverRender(7);
+                player.onManeuverRender(8);
                 break;
             case GLFW_KEY_W:
                 player.setControls(player.M1,player.M2,-1);
-                player.onManeuverRender(10-2);
-                player.onManeuverRender(11-2);
+                player.onManeuverRender(5);
+                player.onManeuverRender(6);
                 break;
             case GLFW_KEY_D:
                 player.setControls(+1,player.M2,player.M3);
-                player.onManeuverRender(5-2);
-                player.onManeuverRender(6-2);
+                player.onManeuverRender(13);
+                player.onManeuverRender(14);
                 break;
             case GLFW_KEY_A:
                 player.setControls(-1,player.M2,player.M3);
-                player.onManeuverRender(7-2);
-                player.onManeuverRender(8-2);
+                player.onManeuverRender(15);
+                player.onManeuverRender(16);
                 break;
             case GLFW_KEY_E:
                 player.setControls(player.M1,-1,player.M3);
-                player.onManeuverRender(13-2);
-                player.onManeuverRender(15-2);
+                player.onManeuverRender(9);
+                player.onManeuverRender(10);
                 break;
             case GLFW_KEY_Q:
                 player.setControls(player.M1,1,player.M3);
-                player.onManeuverRender(14-2);
-                player.onManeuverRender(16-2);
+                player.onManeuverRender(11);
+                player.onManeuverRender(12);
                 break;
         }
     }

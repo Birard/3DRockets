@@ -13,8 +13,8 @@ public class TracerManager {
     public ArrayList<GameItem> gameItems = new ArrayList<>();
     private int nowTrace = 0;
 
-    public TracerManager(NewMesh[] mesh1) {
-        for(int i = 0; i<1000 ; i++) {
+    public TracerManager(NewMesh[] mesh1, int n) {
+        for(int i = 0; i<n ; i++) {
             GameItem box = new GameItem(mesh1);
             box.setPosition(new Vector3f(0, 0, 0));
             box.setScale(1);
@@ -30,9 +30,9 @@ public class TracerManager {
     }
 
     public void resetPoses() {
-        for(int i = 0; i<1000 ; i++) {
-            gameItems.get(i).setPosition(new Vector3f(0,0,0));
-            gameItems.get(i).setQuatRotation(new Quaternionf());
+        for (GameItem gameItem : gameItems) {
+            gameItem.setPosition(new Vector3f(0, 0, 0));
+            gameItem.setQuatRotation(new Quaternionf());
         }
     }
 }
