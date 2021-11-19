@@ -7,10 +7,7 @@ import engine.io.Timer;
 import engine.io.Window;
 import engine.render.Renderer;
 import engine.render.Cameras.ThirdPersonCamera;
-import gameData.Stages.Entitys.Calculator;
-import gameData.Stages.Entitys.Enemy;
-import gameData.Stages.Entitys.Player;
-import gameData.Stages.Entitys.TracerManager;
+import gameData.Stages.Entitys.*;
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -23,16 +20,17 @@ import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 
 public class GameStage extends MainGameStage {
     private static final float MOUSE_SENSITIVITY = 0.2f;
-    public final double frame_cap = 1.0 / 60.0; // в одной секунде 60 кадров
-    private GameGui gui;
-    private boolean again = true, pause = true, closeWindow = false, auto = true, endGame = false;
-    private Renderer renderer;
+    public static final double frame_cap = 1.0 / 60.0; // в одной секунде 60 кадров
+    private static GameGui gui;
+    private static boolean again = true, pause = true, closeWindow = false, auto = true, endGame = false, showHelp = false, handControlSecondPlayer = true;
+    private static Renderer renderer;
     private static final Window window = Window.windows;
-    private static Player player;
-    public static Enemy enemy;
-    private static TracerManager playerTraces;
-    private static TracerManager enemyTraces;
-    public ArrayList<GameItem> gameItems = new ArrayList<>();
+    private static SecondPlayer secondPlayer;
+    private static FirstPlayer firstPlayer;
+    private static PlayerHandController handController = new PlayerHandController();
+    private static TracerManager secondPlayerTraces;
+    private static TracerManager firstPlayerTraces;
+    private static ArrayList<GameItem> gameItems = new ArrayList<>();
 
     public GameStage() {
     }
@@ -43,7 +41,6 @@ public class GameStage extends MainGameStage {
 
         double frame_time = 0;
         int frames = 0;
-
         double time_2;
         double passed;
         double time = Timer.getTime(), unprocessed = 0;
@@ -55,42 +52,47 @@ public class GameStage extends MainGameStage {
         renderer.setCamera(new ThirdPersonCamera());
         renderer.init(window);
 
-        NewMesh[] playerMesh = NewStaticMeshesLoader.load("Satellite/Satellite.obj", "Satellite/text");
-        Player satelliteP = new Player(playerMesh);
-        satelliteP.setPosition(0,0,0);
-        satelliteP.setScale((float) 2);
-        gameItems.add(satelliteP);
-        player = satelliteP;
-        ((ThirdPersonCamera)renderer.camera).setFocus(player);
-        ((ThirdPersonCamera)renderer.camera).setFocusedOpposite();
+        NewMesh[] secondPlayerMesh = NewStaticMeshesLoader.load("Satellite/Satellite.obj", "Satellite/text");
+        SecondPlayer satelliteS = new SecondPlayer(secondPlayerMesh);
+        satelliteS.setPosition(0,0,0);
+        satelliteS.setScale((float) 2);
+        gameItems.add(satelliteS);
+        secondPlayer = satelliteS;
+        ((ThirdPersonCamera)renderer.camera).setFocus(secondPlayer);
+        ((ThirdPersonCamera)renderer.camera).setFocused(true);
         renderer.camera.setPosition(1,0,0);
 
 
-        NewMesh[] enemyMesh = NewStaticMeshesLoader.load("Torpedo1/Torpedo1.obj", "Torpedo1/text");
-        Enemy torpedoEn = new Enemy(enemyMesh);
-        torpedoEn.setPosition(10,0,0);
-        torpedoEn.setScale(1);
-        gameItems.add(torpedoEn);
-        enemy = torpedoEn;
+        NewMesh[] firstPlayerMesh = NewStaticMeshesLoader.load("Torpedo1/Torpedo1.obj", "Torpedo1/text");
+        FirstPlayer torpedoF = new FirstPlayer(firstPlayerMesh);
+        torpedoF.setPosition(10,0,0);
+        torpedoF.setScale(1);
+        gameItems.add(torpedoF);
+        firstPlayer = torpedoF;
 
-//        NewMesh[] mesh = NewStaticMeshesLoader.load("untitled/untitled.obj", "untitled/skyBox");
-//        GameItem skyBox = new GameItem(mesh);
-//        skyBox.setPosition(renderer.camera.getPosition());
-//        skyBox.setScale((float) 400);
-//        gameItems.add(skyBox);
+        NewMesh[] helpMesh = NewStaticMeshesLoader.load("Plane/Plane.obj", "Plane/text");
+        GameItem helpBox = new GameItem(helpMesh);
+        helpBox.setScale((float) 1);
+        gameItems.add(helpBox);
 
-        NewMesh[] mesh = NewStaticMeshesLoader.load("arrow.obj", "untitled/whiteBox");
-        playerTraces = new TracerManager(mesh, 300);
-        gameItems.addAll(playerTraces.gameItems);
+        NewMesh[] pauseMesh = NewStaticMeshesLoader.load("Plane/Plane.obj", "Plane/pause");
+        GameItem pauseBox = new GameItem(pauseMesh);
+        pauseBox.setScale((float) 0.1);
+        gameItems.add(pauseBox);
+        pauseMesh[0].setNeedToRender(false);
 
-        NewMesh[] mesh2 = NewStaticMeshesLoader.load("arrow.obj", "untitled/blackBox");
-        enemyTraces = new TracerManager(mesh2, 600);
-        gameItems.addAll(enemyTraces.gameItems);
+        NewMesh[] whiteArrow = NewStaticMeshesLoader.load("arrow.obj", "Box/whiteBox");
+        secondPlayerTraces = new TracerManager(whiteArrow, 300);
+        gameItems.addAll(secondPlayerTraces.gameItems);
+
+        NewMesh[] blackArrow = NewStaticMeshesLoader.load("arrow.obj", "Box/blackBox");
+        firstPlayerTraces = new TracerManager(blackArrow, 600);
+        gameItems.addAll(firstPlayerTraces.gameItems);
 
         double timeOnGame = 0;
 
         int skippedFrames = 0;
-
+int i = 0;
         while (!closeWindow && !window.windowShouldClose()) {
             can_render = false;
             time_2 = Timer.getTime();
@@ -109,10 +111,10 @@ public class GameStage extends MainGameStage {
                 again = false;
                 endGame = false;
                 timeOnGame = 0;
-                player.setPosition(0,0,0);
-                enemy.setPosition(200,200,200);
-                playerTraces.resetPoses();
-                enemyTraces.resetPoses();
+                secondPlayer.setPosition(0,0,0);
+                firstPlayer.setPosition(200,200,200);
+                secondPlayerTraces.resetPoses();
+                firstPlayerTraces.resetPoses();
                 ((ThirdPersonCamera)renderer.camera).setFocused(true);
             }
 
@@ -125,56 +127,92 @@ public class GameStage extends MainGameStage {
 
             if (frame_time >= 1.0) {
                 frame_time = 0;
-//                System.out.println("FPS: " + frames);
-                player.offAllManeuversRender();
+                System.out.println("FPS: " + frames);
+                secondPlayer.offAllManeuversRender();
                 frames = 0;
             }
             if (can_render) {
-                if(!endGame) {
-
-                    /////////////////////////////////////////////////////////////////////
-                    Vector3f posF = enemy.getPosition();
-                    Vector3f posE = player.getPosition();
-                    double TStar = Calculator.calculateTStar(player, enemy)-1.2;
-
-                    if (timeOnGame == 0 && !pause) System.out.println("* " + TStar);
-                    if (posE.distance(posF) < 0.1 && !endGame) {
-                        timeOnGame += frame_cap;
-                        System.out.println(timeOnGame);
-                        endGame = true;
-                    }
-
-                    //повертаем догоняющего
+                if(showHelp){
+                    i++;
+                    pauseMesh[0].setNeedToRender(false);
+                    helpMesh[0].setNeedToRender(true);
                     Quaternionf qe2 = new Quaternionf();
-//                qe2 = Calculator.calculateQuaternion(TStar, satellit, satellit2);
-                    qe2.rotateTo(new Vector3f(1, 0, 0), new Vector3f((posE.x - posF.x), (posE.y - posF.y), (posE.z - posF.z)));
-                    enemy.setQuatRotation(qe2);
-                    if (auto) {
-                        player.setQuatRotation(qe2);// для идеаль страт
-                    } else {
-                        player.updateRotate(frame_cap);
-                    }
-                    if (!pause) {
-                        enemy.move(frame_cap);
-                        player.move(frame_cap);
-                        timeOnGame += frame_cap;
-                        if (skippedFrames == 3) enemyTraces.createTrace(enemy.getPosition(), enemy.getQuatRotation());
-                        if (skippedFrames == 6) {
-                            playerTraces.createTrace(player.getPosition(), player.getQuatRotation());
-                            enemyTraces.createTrace(enemy.getPosition(), enemy.getQuatRotation());
-                            skippedFrames = 0;
-                        } else skippedFrames++;
-                    }
-//////////////////////////////////////////////////////////////////////
-                    //шоб камера за игроком
-//                ((ThirdPersonCamera)renderer.camera).setFocus(player);
-                    ((ThirdPersonCamera) renderer.camera).updateCamPos();
-//                skyBox.setPosition(renderer.camera.getPosition());
-//////////////////////////////////////////////////////////////////////
+                    qe2.div(renderer.camera.getRotation());
+                    helpBox.setQuatRotation(qe2);
+                    Vector3f camPos = renderer.camera.getPosition();
+                    Vector3f vectorF = new Vector3f(0, (float) 0,-1);
+                    vectorF.rotate(qe2);
+                    qe2.rotateY((float) Math.toRadians(-90));
+                    qe2.rotateX((float) Math.toRadians(90));
+                    qe2.rotateZ((float) Math.toRadians(0));
+                    Vector3f newPosC = new Vector3f((camPos.x + vectorF.x), (camPos.y + vectorF.y), (camPos.z + vectorF.z));
+                    helpBox.setPosition(newPosC);
                 } else {
-                    ((ThirdPersonCamera) renderer.camera).setFocused(false);
-                }
+                    helpMesh[0].setNeedToRender(false);
+                    if (!endGame) {
+                        Vector3f posF = firstPlayer.getPosition();
+                        Vector3f posE = secondPlayer.getPosition();
+                        if (timeOnGame == 0 && !pause) {
+                            double TStar = Calculator.calculateTStar(secondPlayer, firstPlayer) - 1.2;
+                            System.out.println("* " + TStar);
+                        }
+                        if (posE.distance(posF) < 0.1 && !endGame) {
+                            timeOnGame += frame_cap;
+                            System.out.println(timeOnGame);
+                            endGame = true;
+                        }
+                        //повертаем догоняющего
+                        Quaternionf qe2 = new Quaternionf();
+                        qe2.rotateTo(new Vector3f(1, 0, 0), new Vector3f((posE.x - posF.x), (posE.y - posF.y), (posE.z - posF.z)));
 
+                        if(handControlSecondPlayer) {
+                            firstPlayer.setQuatRotation(qe2);
+                        } else  secondPlayer.setQuatRotation(qe2);
+
+                        if (auto) {
+                            if(handControlSecondPlayer) {
+                                secondPlayer.setQuatRotation(qe2);
+                                handController.setRotationQ(secondPlayer.getQuatRotation());
+                            } else  {
+                                firstPlayer.setQuatRotation(qe2);
+                                handController.setRotationQ(firstPlayer.getQuatRotation());
+                            }
+                        } else {
+                            handController.updateRotate(frame_cap);
+                        }
+                        if (!pause) {
+                            firstPlayer.move(frame_cap);
+                            secondPlayer.move(frame_cap);
+                            timeOnGame += frame_cap;
+                            if (skippedFrames == 3)
+                                firstPlayerTraces.createTrace(firstPlayer.getPosition(), firstPlayer.getQuatRotation());
+                            if (skippedFrames == 6) {
+                                secondPlayerTraces.createTrace(secondPlayer.getPosition(), secondPlayer.getQuatRotation());
+                                firstPlayerTraces.createTrace(firstPlayer.getPosition(), firstPlayer.getQuatRotation());
+                                skippedFrames = 0;
+                            } else skippedFrames++;
+                            pauseMesh[0].setNeedToRender(false);
+                        }
+                        //шоб камера за игроком
+//                ((ThirdPersonCamera)renderer.camera).setFocus(player);
+                        ((ThirdPersonCamera) renderer.camera).updateCamPos();
+                        if(pause) {
+                            pauseMesh[0].setNeedToRender(true);
+                            Quaternionf qe3 = new Quaternionf();
+                            qe3.div(renderer.camera.getRotation());
+                            Vector3f camPos = renderer.camera.getPosition();
+                            Vector3f vectorF = new Vector3f(0, (float) 0,-1);
+                            vectorF.rotate(qe3);
+                            qe3.rotateY((float) Math.toRadians(90));
+                            Vector3f newPosC = new Vector3f((camPos.x + vectorF.x), (camPos.y + vectorF.y), (camPos.z + vectorF.z));
+                            pauseBox.setPosition(newPosC);
+//                            qe3.rotateX((float) Math.toRadians(90));
+                            pauseBox.setQuatRotation( qe3);
+                        }
+                    } else {
+                        ((ThirdPersonCamera) renderer.camera).setFocused(false);
+                    }
+                }
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 renderer.render(window, gameItems);
                 gui.render();
@@ -245,40 +283,70 @@ public class GameStage extends MainGameStage {
                     ((ThirdPersonCamera) renderer.camera).setFocusedOpposite();
                 }
                 break;
+            case GLFW_KEY_R:
+                if(Input.isKeyPressed(key)) {
+                    showHelp = !showHelp;
+                    pause = true;
+                }
+                break;
             case GLFW_KEY_V:
                 if(Input.isKeyPressed(key)) {
                     ((ThirdPersonCamera) renderer.camera).setHardFocusedOpposite();
                 }
                 break;
             case GLFW_KEY_S:
-                player.setControls(player.M1,player.M2,1);
-                player.onManeuverRender(7);
-                player.onManeuverRender(8);
+                handController.setM3(1);
+                if(handControlSecondPlayer) {
+                    secondPlayer.onManeuverRender(7);
+                    secondPlayer.onManeuverRender(8);
+                }
                 break;
             case GLFW_KEY_W:
-                player.setControls(player.M1,player.M2,-1);
-                player.onManeuverRender(5);
-                player.onManeuverRender(6);
+                handController.setM3(-1);
+                if(handControlSecondPlayer) {
+                    secondPlayer.onManeuverRender(5);
+                    secondPlayer.onManeuverRender(6);
+                }
                 break;
             case GLFW_KEY_D:
-                player.setControls(+1,player.M2,player.M3);
-                player.onManeuverRender(13);
-                player.onManeuverRender(14);
+                handController.setM1(+1);
+                if(handControlSecondPlayer) {
+                    secondPlayer.onManeuverRender(13);
+                    secondPlayer.onManeuverRender(14);
+                }
                 break;
             case GLFW_KEY_A:
-                player.setControls(-1,player.M2,player.M3);
-                player.onManeuverRender(15);
-                player.onManeuverRender(16);
+                handController.setM1(-1);
+                if(handControlSecondPlayer) {
+                    secondPlayer.onManeuverRender(15);
+                    secondPlayer.onManeuverRender(16);
+                }
                 break;
             case GLFW_KEY_E:
-                player.setControls(player.M1,-1,player.M3);
-                player.onManeuverRender(9);
-                player.onManeuverRender(10);
+                handController.setM2(-1);
+                if(handControlSecondPlayer) {
+                    secondPlayer.onManeuverRender(9);
+                    secondPlayer.onManeuverRender(10);
+                }
                 break;
             case GLFW_KEY_Q:
-                player.setControls(player.M1,1,player.M3);
-                player.onManeuverRender(11);
-                player.onManeuverRender(12);
+                handController.setM2(1);
+                if(handControlSecondPlayer) {
+                    secondPlayer.onManeuverRender(11);
+                    secondPlayer.onManeuverRender(12);
+                }
+                break;
+            case GLFW_KEY_C:
+                if(Input.isKeyPressed(key)) {
+                    handControlSecondPlayer = !handControlSecondPlayer;
+                    if(handControlSecondPlayer) {
+                        handController.setRotationQ(secondPlayer.getQuatRotation());
+                        ((ThirdPersonCamera)renderer.camera).setFocus(secondPlayer);
+                    } else {
+                        handController.setRotationQ(firstPlayer.getQuatRotation());
+                        ((ThirdPersonCamera)renderer.camera).setFocus(firstPlayer);
+                    }
+                }
                 break;
         }
     }

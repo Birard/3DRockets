@@ -7,16 +7,15 @@ import org.joml.Vector3f;
 import org.joml.Vector3d;
 
 
-public class Enemy extends GameItem {
+public class FirstPlayer extends GameItem {
 
-//    отета с формул
-//  private Vector3d speed = new Vector3d(0,0,0);
+
     private final float power = 20;
     private final float k = 1;
 
 
 
-    public Enemy(NewMesh[] mesh1) {
+    public FirstPlayer(NewMesh[] mesh1) {
         super(mesh1);
     }
 

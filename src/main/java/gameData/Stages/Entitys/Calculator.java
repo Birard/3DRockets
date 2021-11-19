@@ -7,12 +7,12 @@ import org.joml.Vector3f;
 
 public class Calculator {
 
-    public static double calculateTStar(Player satellit, Enemy satellit2) {
+    public static double calculateTStar(SecondPlayer satellit, FirstPlayer satellit2) {
         Vector3f posF = satellit2.getPosition();
         Vector3f posE = satellit.getPosition();
         Vector3d speedF = satellit2.getSpeed();
         double k = satellit2.getK();
-        double TStar = Math.sqrt(Math.pow(posE.x - posF.x, 2) +
+        return Math.sqrt(Math.pow(posE.x - posF.x, 2) +
                 Math.pow(posE.y-posF.y, 2) +
                 Math.pow(posE.z-posF.z, 2) +
                 ( Math.pow(speedF.x,2) +
@@ -23,11 +23,10 @@ public class Calculator {
                         (posE.y - posF.y)*speedF.y +
                         (posE.z - posF.z)*speedF.z
                 ))/ ((satellit2.getPower()/k)-satellit.getPower());
-        return TStar;
     }
 
 
-    public static Quaternionf calculateQuaternion(double TStar, Player satellit, Enemy satellit2) {
+    public static Quaternionf calculateQuaternion(double TStar, SecondPlayer satellit, FirstPlayer satellit2) {
         Vector3f posF = satellit2.getPosition();
         Vector3f posE = satellit.getPosition();
         Vector3d speedF = satellit2.getSpeed();
@@ -43,7 +42,7 @@ public class Calculator {
                 double SS = ((posE.z - posF.z) - (speedF.z/k)) / Q;
                 /////////////////////////////////////////////////////////////////////
                 //считаем s7 вместо 180 пі
-                double s7 = 0;
+                double s7;
                     if(C < 0) {
                         s7 = 3.1415 - Math.asin(Math.sqrt(Math.pow(SC,2) + Math.pow(SS,2)));
                     } else {
