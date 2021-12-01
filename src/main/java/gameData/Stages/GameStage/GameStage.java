@@ -73,12 +73,10 @@ public class GameStage extends MainGameStage {
         NewMesh[] helpMesh = NewStaticMeshesLoader.load("Plane/Plane.obj", "Plane/text");
         GameItem helpBox = new GameItem(helpMesh);
         helpBox.setScale((float) 1);
-        gameItems.add(helpBox);
 
         NewMesh[] pauseMesh = NewStaticMeshesLoader.load("Plane/Plane.obj", "Plane/pause");
         GameItem pauseBox = new GameItem(pauseMesh);
         pauseBox.setScale((float) 0.1);
-        gameItems.add(pauseBox);
         pauseMesh[0].setNeedToRender(false);
 
         NewMesh[] whiteArrow = NewStaticMeshesLoader.load("arrow.obj", "Box/whiteBox");
@@ -89,6 +87,8 @@ public class GameStage extends MainGameStage {
         firstPlayerTraces = new TracerManager(blackArrow, 600);
         gameItems.addAll(firstPlayerTraces.gameItems);
 
+        gameItems.add(helpBox);
+        gameItems.add(pauseBox);
         double timeOnGame = 0;
 
         int skippedFrames = 0;
@@ -127,7 +127,7 @@ int i = 0;
 
             if (frame_time >= 1.0) {
                 frame_time = 0;
-                System.out.println("FPS: " + frames);
+//                System.out.println("FPS: " + frames);
                 secondPlayer.offAllManeuversRender();
                 frames = 0;
             }
