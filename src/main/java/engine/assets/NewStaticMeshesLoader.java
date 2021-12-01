@@ -32,6 +32,11 @@ public class NewStaticMeshesLoader {
         resourcePath = getPath(resourcePath);
         texturesDir = getPath(texturesDir);
 
+//        System.out.println(resourcePath);
+        if(resourcePath.contains("/C:")) resourcePath = resourcePath.replace("/C:","C:");
+        if(texturesDir.contains("/C:")) texturesDir = texturesDir.replace("/C:","C:");
+//        System.out.println(resourcePath);
+
         AIScene aiScene = aiImportFile(resourcePath, flags);
         if (aiScene == null) {
             throw new Exception("Error loading model");
