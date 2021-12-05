@@ -154,11 +154,11 @@ int i = 0;
                         Vector3f posE = secondPlayer.getPosition();
                         if (timeOnGame == 0 && !pause) {
                             double TStar = Calculator.calculateTStar(secondPlayer, firstPlayer) - 1.2;
-                            System.out.println("* " + TStar);
+                            System.out.println("Оптимальний час до закінчення гри: " + TStar);
                         }
                         if (posE.distance(posF) < 0.1 && !endGame) {
                             timeOnGame += frame_cap;
-                            System.out.println(timeOnGame);
+                            System.out.println("Час який тривала гра: " + timeOnGame);
                             endGame = true;
                         }
                         //повертаем догоняющего
@@ -296,42 +296,42 @@ int i = 0;
                 break;
             case GLFW_KEY_S:
                 handController.setM3(1);
-                if(handControlSecondPlayer) {
+                if(handControlSecondPlayer && !auto) {
                     secondPlayer.onManeuverRender(7);
                     secondPlayer.onManeuverRender(8);
                 }
                 break;
             case GLFW_KEY_W:
                 handController.setM3(-1);
-                if(handControlSecondPlayer) {
+                if(handControlSecondPlayer && !auto) {
                     secondPlayer.onManeuverRender(5);
                     secondPlayer.onManeuverRender(6);
                 }
                 break;
             case GLFW_KEY_D:
                 handController.setM1(+1);
-                if(handControlSecondPlayer) {
+                if(handControlSecondPlayer && !auto) {
                     secondPlayer.onManeuverRender(13);
                     secondPlayer.onManeuverRender(14);
                 }
                 break;
             case GLFW_KEY_A:
                 handController.setM1(-1);
-                if(handControlSecondPlayer) {
+                if(handControlSecondPlayer && !auto) {
                     secondPlayer.onManeuverRender(15);
                     secondPlayer.onManeuverRender(16);
                 }
                 break;
             case GLFW_KEY_E:
                 handController.setM2(-1);
-                if(handControlSecondPlayer) {
+                if(handControlSecondPlayer && !auto) {
                     secondPlayer.onManeuverRender(9);
                     secondPlayer.onManeuverRender(10);
                 }
                 break;
             case GLFW_KEY_Q:
                 handController.setM2(1);
-                if(handControlSecondPlayer) {
+                if(handControlSecondPlayer && !auto) {
                     secondPlayer.onManeuverRender(11);
                     secondPlayer.onManeuverRender(12);
                 }

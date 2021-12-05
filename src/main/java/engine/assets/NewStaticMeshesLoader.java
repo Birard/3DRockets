@@ -28,7 +28,7 @@ public class NewStaticMeshesLoader {
     }
 
     public static NewMesh[] load(String resourcePath, String texturesDir, int flags) throws Exception {
-
+//        System.out.println(resourcePath);
         resourcePath = getPath(resourcePath);
         texturesDir = getPath(texturesDir);
 
