@@ -89,6 +89,7 @@ public class GameStage extends MainGameStage {
 
         gameItems.add(helpBox);
         gameItems.add(pauseBox);
+
         double timeOnGame = 0;
 
         int skippedFrames = 0;
@@ -116,6 +117,8 @@ int i = 0;
                 secondPlayerTraces.resetPoses();
                 firstPlayerTraces.resetPoses();
                 ((ThirdPersonCamera)renderer.camera).setFocused(true);
+                ((ThirdPersonCamera) renderer.camera).updateCamPos();
+                showHelp = true;
             }
 
             while (unprocessed >= frame_cap) {
