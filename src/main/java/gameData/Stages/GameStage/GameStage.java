@@ -156,7 +156,7 @@ int i = 0;
                             double TStar = Calculator.calculateTStar(secondPlayer, firstPlayer) - 1.2;
                             System.out.println("Оптимальний час до закінчення гри: " + TStar);
                         }
-                        if (posE.distance(posF) < 0.1 && !endGame) {
+                        if (posE.distance(posF) < 0.3 && !endGame) {
                             timeOnGame += frame_cap;
                             System.out.println("Час який тривала гра: " + timeOnGame);
                             endGame = true;
