@@ -16,6 +16,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.lwjgl.assimp.Assimp.*;
 
@@ -31,11 +33,20 @@ public class NewStaticMeshesLoader {
 //        System.out.println(resourcePath);
         resourcePath = getPath(resourcePath);
         texturesDir = getPath(texturesDir);
+//        System.out.println(resourcePath);
 
-//        System.out.println(resourcePath);
-        if(resourcePath.contains("/C:")) resourcePath = resourcePath.replace("/C:","C:");
-        if(texturesDir.contains("/C:")) texturesDir = texturesDir.replace("/C:","C:");
-//        System.out.println(resourcePath);
+        String os = System.getProperty("os.name").toLowerCase();
+        if(os.contains("windows")) {
+            Pattern pattern = Pattern.compile("^/\\w:/");
+            Matcher matcher = pattern.matcher(resourcePath);
+            while (matcher.find()) {
+                resourcePath = resourcePath.replace("/C:/","C:/");
+            }
+            matcher = pattern.matcher(texturesDir);
+            while (matcher.find()) {
+                texturesDir = texturesDir.replace("/C:/","C:/");
+            }
+        }
 
         AIScene aiScene = aiImportFile(resourcePath, flags);
         if (aiScene == null) {
