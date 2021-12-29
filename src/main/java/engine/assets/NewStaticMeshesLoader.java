@@ -39,12 +39,13 @@ public class NewStaticMeshesLoader {
         if(os.contains("windows")) {
             Pattern pattern = Pattern.compile("^/\\w:/");
             Matcher matcher = pattern.matcher(resourcePath);
+            char disk = resourcePath.charAt(1);
             while (matcher.find()) {
-                resourcePath = resourcePath.replace("/C:/","C:/");
+                resourcePath = resourcePath.replace("/" + disk + ":/",disk + ":/");
             }
             matcher = pattern.matcher(texturesDir);
             while (matcher.find()) {
-                texturesDir = texturesDir.replace("/C:/","C:/");
+                texturesDir = texturesDir.replace("/" + disk + ":/",disk + ":/");
             }
         }
 
